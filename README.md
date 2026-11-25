@@ -10,8 +10,13 @@
 
 ## What it is
 
-`main.py` deterministically renders one 1024×1024 PNG meme to `/output/entry.png`
-using only PIL drawing code — no network, no external assets, no stock images.
+`main.ts` deterministically renders one 1024×1024 PNG meme to `/output/entry.png`
+using only Node 22 stdlib code (hand-encoded PNG via `node:zlib`, text drawn
+from a bitmap font embedded in the source) — no network, no external assets,
+no stock images, no Pillow, no system fonts. (v1 used Python + Pillow and was
+rejected by the grader with exit 1: the pinned image has neither Pillow nor
+the DejaVu fonts it loaded. v2 rewrites the same joke/layout in stdlib-only
+TypeScript; see NOTES.md.)
 
 ## How the joke works
 
@@ -37,24 +42,24 @@ template.
 
 ## Measured results
 
-- Output: PNG 1024×1024, RGB, **264,347 bytes** (gate: whole PNG/JPEG,
+- Output: PNG 1024×1024, RGB, **17,788 bytes** (gate: whole PNG/JPEG,
   ≤ 1,048,576 bytes, ≤ 1024×1024) — **passes**
-- sha256: `b0037daa3d00af446ecdde583cbe3aa412ac2c8f36770ebebbf9026fe300cbfe`
+- sha256: `8c6c32de6e488ac731988c298537d9ffbb51a0fea1aa3e4878b049008bc1de7e`
 - Determinism: run twice from clean output dirs → **byte-identical**
   (same sha256 both runs)
 - Kit file hashes: all 8 files in `kit.json` verified OK (`sha256sum -c`)
-- Runtime: ~2 s per run, Python 3.12 + Pillow 10.2.0 (grader: python3.13)
+- Runtime: ~0.5 s per run, Node 22+ stdlib only (grader: Node 22.23.4)
 
 ## Run it
 
 ```sh
-python3 main.py            # writes /output/entry.png
-OUTPUT_DIR=/tmp/out python3 main.py   # local test override
+node main.ts            # writes /output/entry.png
+OUTPUT_DIR=/tmp/out node main.ts   # local test override
 ```
 
 ## Files
 
-- `main.py` — the entrypoint (deterministic renderer)
+- `main.ts` — the entrypoint (deterministic renderer)
 - `entry.png` — rendered output for verification
 - `LICENSE` — MIT
 - `.makefun/owner.json` — payout wallet
